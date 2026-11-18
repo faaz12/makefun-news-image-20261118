@@ -14,6 +14,7 @@
 // /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
+import { createHash } from 'node:crypto';
 import { copyFileSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -32,10 +33,22 @@ if (written !== expected) {
   throw new Error(`entry.png copy incomplete: wrote ${written} of ${expected} bytes`);
 }
 
-// The gate takes a whole PNG of at most 1 MiB and 1024 by 1024 pixels:
-// check the copy is a whole PNG (magic bytes), inside the size cap,
-// and inside the pixel cap (IHDR width/height) before handing it to
-// the judge.
+// A size match alone does not prove the copy is whole — a truncated or
+// corrupted copy could still land at the same byte count — so compare
+// SHA-256 digests of the source and the copy: identical hashes mean
+// identical bytes.
+const hash = (b: Buffer) => createHash('sha256').update(b).digest('hex');
+const srcHash = hash(readFileSync(src));
+const destHash = hash(readFileSync(dest));
+if (srcHash !== destHash) {
+  throw new Error(`entry.png copy corrupted: sha256 ${destHash} != source ${srcHash}`);
+}
+
+// The gate takes a whole PNG of at most 1 MiB at exactly 1024 by 1024
+// pixels: check the copy is a whole PNG (magic bytes), inside the size
+// cap, and at the exact designed size (IHDR width/height) before handing
+// it to the judge — a smaller image would be a degraded entry, so it
+// fails here instead of shipping undersized.
 const bytes = readFileSync(dest);
 const head = bytes.subarray(0, 8);
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -50,6 +63,6 @@ if (bytes.length < 24 || bytes.subarray(12, 16).toString('latin1') !== 'IHDR') {
 }
 const width = bytes.readUInt32BE(16);
 const height = bytes.readUInt32BE(20);
-if (width > 1024 || height > 1024) {
-  throw new Error(`entry.png over the 1024x1024 gate: ${width}x${height}`);
+if (width !== 1024 || height !== 1024) {
+  throw new Error(`entry.png must be exactly 1024x1024: got ${width}x${height}`);
 }
