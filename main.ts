@@ -1,17 +1,14 @@
 // make.fun news-image-20261118 entry (Node 22, standard library only).
 //
-// The picture is the entry.png beside this file: a newspaper front page
-// summing up Wednesday 18 November 2026 — "THE WORLD IN ONE DAY".
-// Hero photo: a sea bridge burning under storm clouds at dawn, patrol
-// boats below (Ukraine's second straight day of strikes on the Crimean
-// bridge; Russia pounds Kyiv bridges). Five headlines below it:
-//   1. Trump lands in Manila for Quad talks (Asia tour ahead of China visit, APEC)
-//   2. Ukraine hits Crimean bridge again (second straight day)
-//   3. Iran drones target Bahrain (US radar site hit; Gulf states intercept more)
-//   4. Canada and China extend trade deals (Xi meets Carney ahead of APEC)
-//   5. Britain sanctions settlement firms (eight firms over West Bank settlements)
-// The program copies it to /output/entry.png, byte for byte, so the
-// judge sees exactly the image in this repository.
+// The picture is the entry.png beside this file: a dense newspaper front
+// page summing up Wednesday 18 November 2026 — "THE WORLD IN ONE DAY".
+// Hero photo: the Shenzhen skyline at dusk, flags out for the APEC summit
+// (Trump's Asia tour: Quad talks in Manila, then Shenzhen with Xi and
+// Putin). Beside it a small world map marking where the news happened,
+// and below it 33 real stories grouped across six continents:
+// Asia 6, Europe 6, Africa 5, North America 6, South America 5,
+// Oceania 5. The program copies it to /output/entry.png, byte for byte,
+// so the judge sees exactly the image in this repository.
 //
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for
 // /output:
