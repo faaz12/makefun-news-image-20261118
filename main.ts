@@ -36,13 +36,23 @@ if (written !== expected) {
 }
 
 // The gate takes a whole PNG of at most 1 MiB and 1024 by 1024 pixels:
-// check the copy is a whole PNG (magic bytes) and inside the size cap
-// before handing it to the judge.
-const head = readFileSync(dest).subarray(0, 8);
+// check the copy is a whole PNG (magic bytes), inside the size cap,
+// and inside the pixel cap (IHDR width/height) before handing it to
+// the judge.
+const bytes = readFileSync(dest);
+const head = bytes.subarray(0, 8);
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 if (!head.equals(PNG_MAGIC)) {
   throw new Error('entry.png is not a whole PNG (bad magic bytes)');
 }
 if (written > 1048576) {
   throw new Error(`entry.png over the 1 MiB gate: ${written} bytes`);
+}
+if (bytes.length < 24 || bytes.subarray(12, 16).toString('latin1') !== 'IHDR') {
+  throw new Error('entry.png is not a whole PNG (missing IHDR chunk)');
+}
+const width = bytes.readUInt32BE(16);
+const height = bytes.readUInt32BE(20);
+if (width > 1024 || height > 1024) {
+  throw new Error(`entry.png over the 1024x1024 gate: ${width}x${height}`);
 }
